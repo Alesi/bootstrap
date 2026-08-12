@@ -26,7 +26,7 @@ jobs:
       - name: actionlint
         # Syntax + semantic checks. Includes "outdated popular actions" detection,
         # so old versions of well-known actions fail here.
-        uses: rhysd/actionlint-action@v1
+        uses: rhysd/actionlint@v1
 
       - name: yamllint
         # General YAML style/formatting. Optional config file: .yamllint.yml
