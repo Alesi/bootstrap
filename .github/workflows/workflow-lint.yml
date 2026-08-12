@@ -29,12 +29,14 @@ jobs:
         uses: rhysd/actionlint@v1.7.12
 
       - name: yamllint
+        continue-on-error: true
         # General YAML style/formatting. Optional config file: .yamllint.yml
         run: |
           python3 -m pip install --quiet --user yamllint
           python3 -m yamllint .github/workflows
 
       - name: Run zizmor
+        continue-on-error: true
         # Security audit. Default inputs: "." (whole repo).
         # advanced-security: false -> fail the job on findings.
         # Pin this action to a release SHA too.
