@@ -1,0 +1,81 @@
+name: workflow-lint
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: workflow-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        # NOTE: zizmor flags non-SHA refs. After the first run, pin the actions
+        # below to their resolved commit SHAs (see "Run zizmor" output).
+
+      - name: actionlint
+        # Syntax + semantic checks. Includes "outdated popular actions" detection,
+        # so old versions of well-known actions fail here.
+        uses: rhysd/actionlint-action@v1
+
+      - name: yamllint
+        # General YAML style/formatting. Optional config file: .yamllint.yml
+        run: |
+          python3 -m pip install --quiet --user yamllint
+          python3 -m yamllint .github/workflows
+
+      - name: Run zizmor
+        # Security audit. Default inputs: "." (whole repo).
+        # advanced-security: false -> fail the job on findings.
+        # Pin this action to a release SHA too.
+        uses: zizmorcore/zizmor-action@main
+        with:
+          advanced-security: false
+
+      - name: Verify action references resolve
+        # Catches invented / wrong owner/repo or revision in every `uses:`.
+        # This is the backstop for AI-generated workflows that reference
+        # actions that don't exist. Uses GITHUB_TOKEN (contents: read).
+        shell: bash
+        run: |
+          failed=0
+          shopt -s nullglob
+          for f in .github/workflows/*.yml .github/workflows/*.yaml; do
+            while read -r ref; do
+              repo="${ref%@*}"
+              rev="${ref#*@}"
+              if ! gh api "repos/$repo" >/dev/null 2>&1; then
+                echo "::error file=$f,title=Unknown action::uses: $ref (repo '$repo' not found)"
+                failed=1
+                continue
+              fi
+              if [[ "$rev" =~ ^[0-9a-f]{40}$ ]]; then
+                if ! gh api "repos/$repo/commits/$rev" >/dev/null 2>&1; then
+                  echo "::error file=$f,title=Unknown revision::uses: $ref (SHA not found)"
+                  failed=1
+                fi
+              elif ! gh api "repos/$repo/git/ref/tags/$rev" >/dev/null 2>&1; then
+                echo "::error file=$f,title=Unknown revision::uses: $ref (tag '$rev' not found)"
+                failed=1
+              fi
+            done < <(grep -rhoE 'uses:[[:space:]]*[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[^[:space:]]+' "$f" | sed 's/uses:[[:space:]]*//')
+          done
+          exit $failed
+
+# Suggested companion: Dependabot config to keep action versions fresh.
+# .github/dependabot.yml
+#   version: 2
+#   updates:
+#     - package-ecosystem: github-actions
+#       directory: /
+#       schedule: { interval: weekly }
