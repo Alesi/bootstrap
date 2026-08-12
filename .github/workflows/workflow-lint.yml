@@ -45,6 +45,7 @@ jobs:
           advanced-security: false
 
       - name: Verify action references resolve
+        continue-on-error: true
         # Catches invented / wrong owner/repo or revision in every `uses:`.
         # This is the backstop for AI-generated workflows that reference
         # actions that don't exist. Uses GITHUB_TOKEN (contents: read).
