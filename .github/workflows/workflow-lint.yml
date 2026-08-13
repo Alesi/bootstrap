@@ -23,6 +23,11 @@ jobs:
         # NOTE: zizmor flags non-SHA refs. After the first run, pin the actions
         # below to their resolved commit SHAs (see "Run zizmor" output).
 
+      - name: Prepare report directory
+        # Findings from the shell-based linters are written to lint-reports/
+        # and uploaded as an artifact (see "Upload lint reports").
+        run: mkdir -p lint-reports
+
       - name: actionlint
         # Syntax + semantic checks. Includes "outdated popular actions" detection,
         # so old versions of well-known actions fail here.
@@ -31,49 +36,68 @@ jobs:
       - name: yamllint
         continue-on-error: true
         # General YAML style/formatting. Optional config file: .yamllint.yml
+        # Findings are saved to lint-reports/yamllint.txt.
+        # pipx is preinstalled on GitHub-hosted runners and avoids the
+        # externally-managed-environment error from pip on ubuntu-24.04.
         run: |
-          python3 -m pip install --quiet --user yamllint
-          python3 -m yamllint .github/workflows
+          pipx run yamllint .github/workflows 2>&1 | tee lint-reports/yamllint.txt
+          cat lint-reports/yamllint.txt
 
       - name: Run zizmor
         continue-on-error: true
         # Security audit. Default inputs: "." (whole repo).
-        # advanced-security: false -> fail the job on findings.
+        # advanced-security: false + annotations: true -> findings render as
+        # annotations on the run Summary page (max 10 per step).
         # Pin this action to a release SHA too.
         uses: zizmorcore/zizmor-action@main
         with:
           advanced-security: false
+          annotations: true
 
       - name: Verify action references resolve
         continue-on-error: true
         # Catches invented / wrong owner/repo or revision in every `uses:`.
         # This is the backstop for AI-generated workflows that reference
         # actions that don't exist. Uses GITHUB_TOKEN (contents: read).
+        # Findings are saved to lint-reports/verify-actions.txt.
         shell: bash
         run: |
           failed=0
           shopt -s nullglob
+          report=lint-reports/verify-actions.txt
+          : > "$report"
           for f in .github/workflows/*.yml .github/workflows/*.yaml; do
             while read -r ref; do
               repo="${ref%@*}"
               rev="${ref#*@}"
               if ! gh api "repos/$repo" >/dev/null 2>&1; then
-                echo "::error file=$f,title=Unknown action::uses: $ref (repo '$repo' not found)"
+                echo "::error file=$f,title=Unknown action::uses: $ref (repo '$repo' not found)" | tee -a "$report"
                 failed=1
                 continue
               fi
               if [[ "$rev" =~ ^[0-9a-f]{40}$ ]]; then
                 if ! gh api "repos/$repo/commits/$rev" >/dev/null 2>&1; then
-                  echo "::error file=$f,title=Unknown revision::uses: $ref (SHA not found)"
+                  echo "::error file=$f,title=Unknown revision::uses: $ref (SHA not found)" | tee -a "$report"
                   failed=1
                 fi
               elif ! gh api "repos/$repo/git/ref/tags/$rev" >/dev/null 2>&1; then
-                echo "::error file=$f,title=Unknown revision::uses: $ref (tag '$rev' not found)"
+                echo "::error file=$f,title=Unknown revision::uses: $ref (tag '$rev' not found)" | tee -a "$report"
                 failed=1
               fi
             done < <(grep -rhoE 'uses:[[:space:]]*[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[^[:space:]]+' "$f" | sed 's/uses:[[:space:]]*//')
           done
+          cat lint-reports/verify-actions.txt
           exit $failed
+
+      - name: Upload lint reports
+        if: always()
+        # Bundle the shell linters' findings so they can be downloaded from the
+        # run Summary page and read later. Runs even if a linter above failed.
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-lint-reports
+          path: lint-reports/
+          if-no-files-found: ignore
 
 # Suggested companion: Dependabot config to keep action versions fresh.
 # .github/dependabot.yml
