@@ -31,19 +31,19 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      #- name: Ensure triage labels
-        #shell: bash
-        #run: |
-          #set +e
-          #gh label create triage                --color ededed --force || true
-          #gh label create needs-info            --color fbca04 --force || true
-          #gh label create po-approved           --color 0e8a16 --force || true
-          #gh label create po-rejected           --color b60205 --force || true
-          #gh label create architect-approved    --color 0e8a16 --force || true
-          #gh label create architect-rejected    --color b60205 --force || true
-          #gh label create ready-for-implementation --color 1d76db --force || true
-          #gh label create risk-low              --color 0e8a16 --force || true
-          #gh label create risk-high             --color b60205 --force || true
+      - name: Ensure triage labels
+        shell: bash
+        run: |
+          set +e
+          gh label create triage                --color ededed --force || true
+          gh label create needs-info            --color fbca04 --force || true
+          gh label create po-approved           --color 0e8a16 --force || true
+          gh label create po-rejected           --color b60205 --force || true
+          gh label create architect-approved    --color 0e8a16 --force || true
+          gh label create architect-rejected    --color b60205 --force || true
+          gh label create ready-for-implementation --color 1d76db --force || true
+          gh label create risk-low              --color 0e8a16 --force || true
+          gh label create risk-high             --color b60205 --force || true
 
       # Each stage runs opencode headlessly with a dedicated primary agent.
       # use_github_token: true lets them read/comment/edit issues and apply
@@ -90,4 +90,17 @@ jobs:
           use_github_token: true
           prompt: |
             Review this issue as architect: #${{ github.event.issue.number }}
+            Fetch it with `gh issue view ${{ github.event.issue.number }}`.
+
+      - name: Stage 4 - Implement
+        uses: anomalyco/opencode/github@github-v1.2.25
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        with:
+          model: opencode/big-pickle
+          agent: github-issues
+          use_github_token: true
+          prompt: |
+            Implement issue #${{ github.event.issue.number }}.
             Fetch it with `gh issue view ${{ github.event.issue.number }}`.
