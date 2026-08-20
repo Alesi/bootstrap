@@ -1,0 +1,44 @@
+name: Capture PR Feedback
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: feedback-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    name: Extract feedback lesson
+    if: github.event.review.state == 'changes_requested'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Capture feedback
+        uses: anomalyco/opencode/github@github-v1.2.25
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        with:
+          model: opencode/big-pickle
+          agent: feedback-capture
+          use_github_token: true
+          prompt: |
+            A PR in this repository received changes-requested review feedback.
+            PR: #${{ github.event.pull_request.number }}
+            Review: ${{ github.event.review.url }}
+
+            Read the review comments and the PR diff. Extract a reusable lesson
+            and append it to `.opencode/feedback-log.md`. Then open a PR with
+            the change.

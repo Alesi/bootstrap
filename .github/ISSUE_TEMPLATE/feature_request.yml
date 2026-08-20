@@ -1,0 +1,73 @@
+name: Feature request
+description: Describe a feature, change, or improvement for this system
+title: "Summary: "
+labels: ["triage"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this issue!
+        Fill in the required fields (marked *). Optional fields help reviewers
+        judge the issue faster. You may write in English or Finnish — a bot
+        translates and formats the issue after it is opened.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary *
+      description: One paragraph describing what you want and why.
+      placeholder: |
+        What should be done, in a nutshell.
+    validations:
+      required: true
+
+  - type: textarea
+    id: background
+    attributes:
+      label: Background / Context
+      description: What problem or situation is this solving? Any links or references.
+      placeholder: |
+        Why is this needed? What happens today without it?
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior *
+      description: What should happen once this is implemented?
+      placeholder: |
+        When this is done, users should be able to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: Concrete, checkable outcomes that define "done".
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: false
+
+  - type: input
+    id: affected-area
+    attributes:
+      label: Affected area / relevant code
+      description: Files, modules, services, or documentation this touches.
+      placeholder: e.g. .github/workflows, src/api, docs/
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context / dependencies
+      description: Anything else — decisions to make, blockers, related issues.
+      placeholder: |
+        Depends on #...; open design questions; notes for the reviewer.
+    validations:
+      required: false
