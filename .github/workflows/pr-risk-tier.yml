@@ -16,69 +16,69 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Determine risk tier
-        id: risk
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR=${{ github.event.pull_request.number }}
-          FILES=$(gh pr diff "$PR" --name-only 2>/dev/null || echo "")
+      #- name: Determine risk tier
+        #id: risk
+        #env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #run: |
+          #PR=${{ github.event.pull_request.number }}
+          #FILES=$(gh pr diff "$PR" --name-only 2>/dev/null || echo "")
 
-          HIGH=false
+          #HIGH=false
 
           # Infrastructure / CI / security-sensitive paths
-          HIGH_PATTERNS=(
-            ".github/workflows/"
-            "kali-linux/"
-            "package-lock.json"
-            ".opencode/"
-            "Dockerfile"
-            "docker-compose"
-          )
+          #HIGH_PATTERNS=(
+            #".github/workflows/"
+            #"kali-linux/"
+            #"package-lock.json"
+            #".opencode/"
+            #"Dockerfile"
+            #"docker-compose"
+          #)
 
-          for pattern in "${HIGH_PATTERNS[@]}"; do
-            if echo "$FILES" | grep -q "$pattern"; then
-              HIGH=true
-              break
-            fi
-          done
+          #for pattern in "${HIGH_PATTERNS[@]}"; do
+            #if echo "$FILES" | grep -q "$pattern"; then
+              #HIGH=true
+              #break
+            #fi
+          #done
 
-          echo "high=$HIGH" >> "$GITHUB_OUTPUT"
+          #echo "high=$HIGH" >> "$GITHUB_OUTPUT"
 
-      - name: Apply risk label
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR=${{ github.event.pull_request.number }}
-          IS_HIGH=${{ steps.risk.outputs.high }}
+      #- name: Apply risk label
+        #env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #run: |
+          #PR=${{ github.event.pull_request.number }}
+          #IS_HIGH=${{ steps.risk.outputs.high }}
 
-          if [ "$IS_HIGH" = "true" ]; then
-            gh pr edit "$PR" --add-label risk-high --remove-label risk-low 2>/dev/null || \
-            gh pr edit "$PR" --add-label risk-high
-          else
-            gh pr edit "$PR" --add-label risk-low --remove-label risk-high 2>/dev/null || \
-            gh pr edit "$PR" --add-label risk-low
-          fi
+          #if [ "$IS_HIGH" = "true" ]; then
+            #gh pr edit "$PR" --add-label risk-high --remove-label risk-low 2>/dev/null || \
+            #gh pr edit "$PR" --add-label risk-high
+          #else
+            #gh pr edit "$PR" --add-label risk-low --remove-label risk-high 2>/dev/null || \
+            #gh pr edit "$PR" --add-label risk-low
+          #fi
 
-  auto-merge:
-    name: Auto-merge low-risk PRs
-    needs: classify
-    if: >-
-      github.event.pull_request.head.repo.full_name != github.repository
-      || github.event.pull_request.head.ref != 'main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Enable auto-merge for low-risk
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR=${{ github.event.pull_request.number }}
+  #auto-merge:
+    #name: Auto-merge low-risk PRs
+    #needs: classify
+    #if: >-
+      #github.event.pull_request.head.repo.full_name != github.repository
+      #|| github.event.pull_request.head.ref != 'main'
+    #runs-on: ubuntu-latest
+    #steps:
+      #- name: Enable auto-merge for low-risk
+        #env:
+          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #run: |
+          #PR=${{ github.event.pull_request.number }}
 
           # Only auto-merge if the PR has risk-low label
-          LABELS=$(gh pr view "$PR" --json labels -q '.labels[].name')
-          if echo "$LABELS" | grep -q "^risk-low$"; then
-            gh pr merge "$PR" --auto --squash
-            echo "Auto-merge enabled for PR #$PR"
-          else
-            echo "PR #$PR is not risk-low, skipping auto-merge"
-          fi
+          #LABELS=$(gh pr view "$PR" --json labels -q '.labels[].name')
+          #if echo "$LABELS" | grep -q "^risk-low$"; then
+            #gh pr merge "$PR" --auto --squash
+            #echo "Auto-merge enabled for PR #$PR"
+          #else
+            #echo "PR #$PR is not risk-low, skipping auto-merge"
+          #fi
