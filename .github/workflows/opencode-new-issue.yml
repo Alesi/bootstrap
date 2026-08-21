@@ -64,6 +64,10 @@ jobs:
             A new issue was just opened in this repository: #${{ github.event.issue.number }}
             Clean it with `gh issue view ${{ github.event.issue.number }}`.
 
+      - name: Clean working tree
+        if: always()
+        run: git reset --hard && git clean -fd
+
       - name: Stage 2 - Product owner review
         uses: anomalyco/opencode/github@github-v1.2.25
         continue-on-error: true
@@ -78,6 +82,10 @@ jobs:
             Review this issue as product owner: #${{ github.event.issue.number }}
             Fetch it with `gh issue view ${{ github.event.issue.number }}`.
 
+      - name: Clean working tree
+        if: always()
+        run: git reset --hard && git clean -fd
+
       - name: Stage 3 - Architect review
         uses: anomalyco/opencode/github@github-v1.2.25
         continue-on-error: true
@@ -91,6 +99,10 @@ jobs:
           prompt: |
             Review this issue as architect: #${{ github.event.issue.number }}
             Fetch it with `gh issue view ${{ github.event.issue.number }}`.
+
+      - name: Clean working tree
+        if: always()
+        run: git reset --hard && git clean -fd
 
       - name: Stage 4 - Implement
         uses: anomalyco/opencode/github@github-v1.2.25
