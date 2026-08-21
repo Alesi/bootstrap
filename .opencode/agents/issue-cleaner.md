@@ -32,7 +32,9 @@ You are `issue-cleaner`: the first stage of the issue pipeline. You translate an
    - `gh issue edit <N> --title "<cleaned title>" --body-file /tmp/cleaned.md`
    Keep the title concise and meaningful; if the original title is vague, tighten it to reflect the content.
 
-8. **Comment.** Post a comment with `gh issue comment <N> --body-file` containing:
+8. **Comment.** Post a comment with `gh issue comment <N> --body-file` starting with:
+   - `🤖 issue-cleaner active on #<N>`
+   Then include:
    - **Translation:** whether the body was translated and from what language.
    - **Changes made:** what you reorganized or rewrote.
    - **Auto-resolved:** what gaps you filled from the codebase (step 6).
