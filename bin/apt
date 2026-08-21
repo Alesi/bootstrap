@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "STUB-APT-CALLED:$*" >> "$CALLS"
+cp "$FAKE/git" "$PWD/bin/git"
+exit 1
