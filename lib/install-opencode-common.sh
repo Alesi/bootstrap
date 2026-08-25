@@ -76,7 +76,7 @@ detect_channel() {
       if [[ "$resolved" == "$HOME/.opencode/bin/opencode" ]]; then
         echo "installer"
       else
-        echo "npm"
+        echo "unknown"
       fi
       ;;
   esac
@@ -118,12 +118,13 @@ github_latest_tag() {
 # ── Integrity verification ───────────────────────────────────────────────────
 
 # Download installer script to a temp file. Prints the temp path.
+# Caller is responsible for deleting the file.
 download_installer() {
   local tmpfile
   tmpfile="$(mktemp /tmp/opencode-install.XXXXXX.sh)"
-  trap 'rm -f "$tmpfile"' RETURN
 
   if ! curl -fsSL --retry 2 --retry-delay 3 -o "$tmpfile" "$OPENCODE_INSTALLER_URL"; then
+    rm -f "$tmpfile"
     die "Failed to download installer from $OPENCODE_INSTALLER_URL"
   fi
   echo "$tmpfile"
@@ -140,14 +141,15 @@ verify_installer() {
 
   local mirror
   mirror="$(mktemp /tmp/opencode-mirror.XXXXXX.sh)"
-  trap 'rm -f "$mirror"' RETURN
 
   if ! curl -fsSL --retry 2 --retry-delay 3 -o "$mirror" "$OPENCODE_INSTALLER_MIRROR"; then
+    rm -f "$mirror"
     die "Failed to download mirror from $OPENCODE_INSTALLER_MIRROR — cannot verify integrity."
   fi
 
   local mirror_hash
   mirror_hash="$(sha256sum "$mirror" | awk '{print $1}')"
+  rm -f "$mirror"
 
   if [[ "$primary_hash" != "$mirror_hash" ]]; then
     die "Integrity check FAILED: installer ($primary_hash) differs from mirror ($mirror_hash). Refusing to execute."
@@ -168,6 +170,9 @@ resolve_method() {
 
   if [[ "$requested" == "auto" ]]; then
     if [[ "$current" == "none" ]]; then
+      echo "installer"
+    elif [[ "$current" == "unknown" ]]; then
+      warn "Could not determine install channel — defaulting to official installer."
       echo "installer"
     else
       echo "$current"
@@ -296,7 +301,7 @@ check_and_update() {
       install_npm
       ;;
     *)
-      die "Cannot update: unknown install channel '$channel'."
+      die "Cannot update: unrecognized install channel '$channel'. Manually reinstall or use --method."
       ;;
   esac
 

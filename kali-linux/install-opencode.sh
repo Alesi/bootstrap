@@ -25,7 +25,8 @@ LIB_DIR="$REPO_ROOT/lib"
 
 # Source shared library
 if [[ ! -f "$LIB_DIR/install-opencode-common.sh" ]]; then
-  die "Shared library not found at $LIB_DIR/install-opencode-common.sh"
+  echo "[opencode] ERROR: Shared library not found at $LIB_DIR/install-opencode-common.sh" >&2
+  exit 1
 fi
 # shellcheck source=../lib/install-opencode-common.sh
 source "$LIB_DIR/install-opencode-common.sh"
