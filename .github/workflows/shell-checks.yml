@@ -17,49 +17,49 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      #- name: Install shellcheck
-        #uses: koalaman/shellcheck@v0.10.0
+      - name: Install shellcheck
+        uses: koalaman/shellcheck@v0.10.0
 
-      #- name: Install shfmt
-        #uses: mvdan/sh@v3.11.0
+      - name: Install shfmt
+        uses: mvdan/sh@v3.11.0
 
-      #- name: Install shellharden
-        #run: |
-          #curl -sSLo /tmp/shellharden.tar.gz \
-            #https://github.com/anordal/shellharden/releases/download/v4.3.1/shellharden-x86_64-unknown-linux-gnu.tar.gz
-          #tar -xzf /tmp/shellharden.tar.gz -C /tmp
+      - name: Install shellharden
+        run: |
+          curl -sSLo /tmp/shellharden.tar.gz \
+            https://github.com/anordal/shellharden/releases/download/v4.3.1/shellharden-x86_64-unknown-linux-gnu.tar.gz
+          tar -xzf /tmp/shellharden.tar.gz -C /tmp
 
-      #- name: Syntax check (bash -n)
-        #run: |
-          #set -e
-          #while IFS= read -r script; do
-            #echo "==> $script"
-            #bash -n "$script"
-          #done < <(find . -type f -name '*.sh' -not -path './.git/*' | sort)
+      - name: Syntax check (bash -n)
+        run: |
+          set -e
+          while IFS= read -r script; do
+            echo "==> $script"
+            bash -n "$script"
+          done < <(find . -type f -name '*.sh' -not -path './.git/*' | sort)
 
-      #- name: Formatting check (shfmt)
-        #run: |
-          #set -e
-          #while IFS= read -r script; do
-            #echo "==> $script"
-            #shfmt -d -i 2 "$script"
-          #done < <(find . -type f -name '*.sh' -not -path './.git/*' | sort)
-          #echo "All scripts are properly formatted."
+      - name: Formatting check (shfmt)
+        run: |
+          set -e
+          while IFS= read -r script; do
+            echo "==> $script"
+            shfmt -d -i 2 "$script"
+          done < <(find . -type f -name '*.sh' -not -path './.git/*' | sort)
+          echo "All scripts are properly formatted."
 
-      #- name: Quality check (shellcheck)
-        #run: |
-          #set -e
-          #while IFS= read -r script; do
-            #echo "==> $script"
-            #shellcheck "$script"
-          #done < <(find . -type f -name '*.sh' -not -path './.git/*' | sort)
-          #echo "All scripts pass shellcheck."
+      - name: Quality check (shellcheck)
+        run: |
+          set -e
+          while IFS= read -r script; do
+            echo "==> $script"
+            shellcheck "$script"
+          done < <(find . -type f -name '*.sh' -not -path './.git/*' | sort)
+          echo "All scripts pass shellcheck."
 
-      #- name: Security check (shellharden)
-        #run: |
-          #set -e
-          #while IFS= read -r script; do
-            #echo "==> $script"
-            #/tmp/shellharden --check "$script"
-          #done < <(find . -type f -name '*.sh' -not -path './.git/*' | sort)
-          #echo "All scripts are hardened."
+      - name: Security check (shellharden)
+        run: |
+          set -e
+          while IFS= read -r script; do
+            echo "==> $script"
+            /tmp/shellharden --check "$script"
+          done < <(find . -type f -name '*.sh' -not -path './.git/*' | sort)
+          echo "All scripts are hardened."
