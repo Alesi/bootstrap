@@ -31,7 +31,6 @@ jobs:
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         with:
-          model: opencode/big-pickle
           agent: feedback-capture
           use_github_token: true
           prompt: |
