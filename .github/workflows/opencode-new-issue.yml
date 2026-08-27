@@ -112,3 +112,9 @@ jobs:
           prompt: |
             Implement issue #${{ github.event.issue.number }}.
             Fetch it with `gh issue view ${{ github.event.issue.number }}`.
+
+            IMPORTANT: Your final reply is used verbatim as the PR title and body.
+            Do NOT narrate your reasoning or tool output. End with a clean PR summary:
+            a short human-readable title, and a body starting with "Closes #<N>"
+            (to link/auto-close the issue) followed by a "## Summary" section that
+            explains what changed, why, and how it was done, plus how you verified it.
