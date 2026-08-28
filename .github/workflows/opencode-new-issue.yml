@@ -57,6 +57,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         with:
+          model: opencode/big-pickle
           agent: issue-cleaner
           use_github_token: true
           prompt: |
@@ -74,6 +75,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         with:
+          model: opencode/big-pickle
           agent: po-review
           use_github_token: true
           prompt: |
@@ -91,6 +93,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         with:
+          model: opencode/big-pickle
           agent: architect-review
           use_github_token: true
           prompt: |
@@ -107,6 +110,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         with:
+          model: opencode/big-pickle
           agent: github-issues
           use_github_token: true
           prompt: |
