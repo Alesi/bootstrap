@@ -47,12 +47,14 @@ You MUST only use these `gh` commands:
 
    **Verdict:** APPROVED | REJECTED | NEEDS MORE INFO | BLOCKED
    - **Feasibility:** one line on whether and how it can be built.
-   - **Touch points:** the concrete files/modules involved (or the gap if unknown).
-   - **Risks:** what could break or bite later.
+    - **Touch points:** the concrete files/modules involved (or the gap if unknown).
+    - **Workflows?:** yes/no — does the change require adding or modifying anything under `.github/workflows/`? (CI changes, new workflows, etc.)
+    - **Risks:** what could break or bite later.
    - **Recommendations:** design choices the implementer should follow.
    - **Estimate:** rough size + unknowns.
 
 6. **Label and gate.** 
+   - If the change touches `.github/workflows/**` (see **Workflows?** above), apply the `workflows` label so the implement stage knows it needs elevated token permissions. Keep it even if the issue itself is otherwise rejected — it signals the implementation path needs `workflows` access.
    - APPROVED → add `architect-approved` and `ready-for-implementation` (remove `architect-rejected` if present). This is the final gate: only issues with this label should be picked up for implementation.
    - REJECTED → add `architect-rejected`, remove `architect-approved` and `ready-for-implementation`.
    - NEEDS MORE INFO / BLOCKED → no approval labels; leave `needs-info` as appropriate.
